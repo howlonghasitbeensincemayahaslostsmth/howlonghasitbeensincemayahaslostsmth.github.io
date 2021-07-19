@@ -1,0 +1,162 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <title>Maya's Log</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="style.css">
+  <script
+  src="https://code.jquery.com/jquery-3.4.1.js"
+  integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+  crossorigin="anonymous"></script>
+  <script>
+    function SubForm (){
+        $.ajax({
+            url:'https://api.apispreadsheets.com/data/15646/',
+            type:'post',
+            data:$("#myForm").serializeArray(),
+            success: function(){
+              stopwatch.restart();
+              window.location.reload();
+            },
+            error: function(){
+              alert("Error: Form Not Submitted")
+            }
+        });
+        
+    }
+    </script>
+
+</head>
+
+<body onload="stopwatch.start()">
+
+  <!-- <button onclick="SubForm()">Submit</button> -->
+  <!-- your content here... -->
+  <h1>How long has it been since Maya has misplaced something?</h1>
+  
+  <!-- <nav class="controls" >
+    <a href="#" class="button"  onClick="stopwatch.restart();" >She lost something</a>
+</nav> -->
+<div class="stopwatch"></div>
+<ul class="results"></ul>
+  <script src="script.js"></script>
+  <div id="form"> 
+    <form id="myForm" >
+      <h1><label>What has she misplaced?</label></h1>
+          <div class="writeInInputs">
+              <h3><label>Date</label></h3>
+              <!-- <input name="Date" placeholder="Enter the Name of the Song" /> -->
+              <input name="Date" type=date id=e>
+              <script>
+              var today = new Date();
+              var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+              var hours = today.getHours();
+              hours = ("0" + hours).slice(-2);
+              var minutes = today.getMinutes();
+              minutes = ("0" + minutes).slice(-2);
+              var seconds = today.getSeconds();
+              seconds = ("0" + seconds).slice(-2);
+              var time = hours + ":" + minutes + ":" + seconds;
+              var dateTime = date+' '+time;
+              document.getElementById('e').value = today.toISOString().substring(0, 10);
+              </script>
+             
+              <h3><label>Time</label></h3>
+              <input name="Time" type=time id=t>
+              <script>
+                document.getElementById('t').value = time;
+              </script>
+              
+              <h3><label>Item</label></h3>
+              <input name="Item" placeholder="Enter the item lost">
+          </div>     
+    </form>
+    <div id="buttonBreak">
+          <button onclick="SubForm()" >  Submit </button>
+      </div>
+      <!-- <a href="display.html" target="_blank"> Check out the queue </a>  -->
+  </div>
+  <div id="hero">
+		<h1>List of misplaced items</h1>
+    <h2>Date | Time | Item</h2>
+		
+	</div>	
+
+	<div id="display">
+		<div id="loader"> 
+			<h4> Loading</h4> 
+		</div>
+		<div id="allSongs">
+		</div>
+		<div id="errorMessage"> 
+			<h2> Failed to get data. Please refresh </h2>
+		</div>
+	</div>
+	<!-- <a href="form.html" target="_blank" style="text-decoration: none; color:white;"> Fill out another song request </a>  -->
+	
+	<script>
+		let allSongsElm = document.getElementById("allSongs")
+		let loaderElm = document.getElementById("loader")
+		let errorMessageElm = document.getElementById("errorMessage")
+		
+		function setErrorDisplay(){
+			loaderElm.style.display = "none"
+			allSongsElm.style.display = "none"
+			errorMessageElm.style.display = "block"
+		}
+			
+		
+fetch("https://api.apispreadsheets.com/data/15646/").then(res=>{
+			if (res.status === 200){
+				res.json().then(data=>{
+					const yourData = data["data"]
+					for(let i = 0; i < yourData.length; i++){
+						let rowInfo = yourData[i]
+
+						let rowInfoDiv = document.createElement("div")
+						rowInfoDiv.classList.add("song-row")
+
+						let rowSong = document.createElement("h2")
+						let rowSongNode = document.createTextNode(rowInfo["Date"])
+						rowSong.appendChild(rowSongNode)
+						rowSong.classList.add("Date")
+
+						let rowArtist = document.createElement("h2")
+						let rowArtistNode = document.createTextNode(rowInfo["Time"])
+						rowArtist.appendChild(rowArtistNode)
+						rowArtist.classList.add("Time")
+
+						let rowLink = document.createElement("h2")
+						let rowLinkNode = document.createTextNode(rowInfo["Item"])
+						rowLink.appendChild(rowLinkNode)
+						rowLink.classList.add("Item")
+
+						rowInfoDiv.appendChild(rowSong)
+						rowInfoDiv.appendChild(rowArtist)
+						rowInfoDiv.appendChild(rowLink)
+						
+
+						allSongsElm.appendChild(rowInfoDiv)
+
+					}
+					
+					loaderElm.style.display = "none"
+					allSongsElm.style.display = "block"
+					errorMessageElm.style.display = "none"
+
+				}).catch(err => {
+					setErrorDisplay()
+				})
+			}
+			else{
+				setErrorDisplay()
+			}
+		}).catch(err =>{
+			setErrorDisplay()
+		})
+	</script>
+</body>
+</html>
